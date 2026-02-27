@@ -1,5 +1,10 @@
-
 import { PDFDocument } from 'pdf-lib';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Configure PDF.js worker using the local file in /public
+if (typeof window !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+}
 
 /**
  * Converts an array of image files (JPEG/PNG) into a single PDF document.
@@ -51,4 +56,46 @@ export const mergePDFs = async (
   }
 
   return await mergedPdf.save({ useObjectStreams: true });
+};
+
+/**
+ * Converts a PDF file into multiple image files (one per page).
+ */
+export const pdfToImages = async (
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<{ blob: Blob; name: string }[]> => {
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+  const pdf = await loadingTask.promise;
+  const numPages = pdf.numPages;
+  const result: { blob: Blob; name: string }[] = [];
+
+  for (let i = 1; i <= numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 2.0 }); // High resolution
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d')!;
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    await page.render({ canvasContext: context, viewport } as any).promise;
+    
+    const blob = await new Promise<Blob>((resolve) => 
+      canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.9)
+    );
+    
+    result.push({
+      blob,
+      name: `page-${i}.jpg`
+    });
+
+    if (onProgress) {
+      onProgress(Math.round((i / numPages) * 100));
+    }
+    
+    page.cleanup();
+  }
+
+  return result;
 };

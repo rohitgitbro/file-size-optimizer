@@ -29,6 +29,7 @@ export function Footer() {
               <li><MuiLink href="/image-optimizer" variant="body2" color="text.secondary">Image Optimizer</MuiLink></li>
               <li><MuiLink href="/pdf-converter" variant="body2" color="text.secondary">Images to PDF</MuiLink></li>
               <li><MuiLink href="/pdf-merger" variant="body2" color="text.secondary">PDF Merger</MuiLink></li>
+              <li><MuiLink href="/pdf-to-image" variant="body2" color="text.secondary">PDF to Image</MuiLink></li>
             </Box>
           </Grid>
           <Grid size={{ xs: 6, md: 2 }}>

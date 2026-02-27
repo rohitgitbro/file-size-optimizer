@@ -1,10 +1,11 @@
 import { Container, Box, Typography, Grid, Card, CardContent, Button, Stack, Chip, Divider } from '@mui/material';
-import { Image as ImageIcon, FileText, Zap, ShieldCheck, Lock, ArrowRight } from 'lucide-react';
+import { Image as ImageIcon, FileText, Zap, ShieldCheck, Lock, ArrowRight, Download } from 'lucide-react';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { ImageOptimizer } from '@/components/features/ImageOptimizer';
 import { PDFOptimizer } from '@/components/features/PDFOptimizer';
 import { PDFMerger } from '@/components/features/PDFMerger';
+import { PDFToImage } from '@/components/features/PDFToImage';
 import Link from 'next/link';
 
 export default function Home() {
@@ -25,35 +26,35 @@ export default function Home() {
                   sx={{ mb: 2, fontWeight: 700 }} 
                 />
                 <Typography variant="h1" gutterBottom sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' }, lineHeight: 1.1 }}>
-                  Precise File Tools for <Box component="span" sx={{ color: 'primary.main' }}>Gov Forms</Box>
+                  Precise File Tools for <Box component="span" sx={{ color: 'primary.main' }}>Modern Work</Box>
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 4, fontSize: '1.2rem', maxWidth: 600 }}>
-                  Resize images and compress PDFs to exact KB requirements for SSC, UPSC, IBPS, and other government applications. No upload to server, completely private.
+                  Optimize images, merge PDFs, and convert formats with ease. No upload to server, completely private and secure.
                 </Typography>
                 <Stack direction="row" spacing={2}>
                   <Button variant="contained" size="large" endIcon={<ArrowRight />} href="#tools">
-                    Start Now
+                    See Tools
                   </Button>
                   <Button variant="outlined" size="large">
-                    Learn Privacy
+                    Privacy First
                   </Button>
                 </Stack>
               </Grid>
               <Grid size={{ xs: 12, md: 5 }} sx={{ display: { xs: 'none', md: 'block' } }}>
                 <Box sx={{ p: 4, bgcolor: 'primary.main', borderRadius: 4, color: 'white', position: 'relative', overflow: 'hidden' }}>
-                  <Typography variant="h6" gutterBottom fontWeight={700}>Why GovFormOptimizer?</Typography>
+                  <Typography variant="h6" gutterBottom fontWeight={700}>Security & Speed</Typography>
                   <Stack spacing={2} sx={{ mt: 3 }}>
                     <Box sx={{ display: 'flex', gap: 2 }}>
                       <Zap size={24} />
-                      <Typography variant="body2">Instant client-side processing (&lt;2s)</Typography>
+                      <Typography variant="body2">Instant browser processing (&lt;1s)</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 2 }}>
                       <ShieldCheck size={24} />
-                      <Typography variant="body2">Preset targets for SSC, UPSC, PSC</Typography>
+                      <Typography variant="body2">Zero file uploads to any server</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 2 }}>
                       <Lock size={24} />
-                      <Typography variant="body2">Military-grade privacy (No Server Upload)</Typography>
+                      <Typography variant="body2">Client-side only architecture</Typography>
                     </Box>
                   </Stack>
                   <Box sx={{ position: 'absolute', right: -20, bottom: -20, opacity: 0.1 }}>
@@ -70,64 +71,78 @@ export default function Home() {
           <Container maxWidth="lg">
             <Box sx={{ mb: 8 }}>
               <Typography variant="h3" align="center" fontWeight={800} gutterBottom>
-                Choose Your Tool
+                Powerful Browser Tools
               </Typography>
               <Typography variant="body1" align="center" color="text.secondary">
-                Select the tool you need for your application
+                Secure, fast, and 100% private file manipulation
               </Typography>
             </Box>
 
             <Grid container spacing={4} sx={{ mb: 10 }}>
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
-                  <CardContent sx={{ p: 4 }}>
-                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1.5, bgcolor: 'primary.light', borderRadius: 2, color: 'white' }}>
-                      <ImageIcon size={32} />
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1, bgcolor: 'primary.light', borderRadius: 2, color: 'white' }}>
+                      <ImageIcon size={24} />
                     </Box>
-                    <Typography variant="h5" fontWeight={700} gutterBottom>Image Optimizer</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                      Compress and resize photos, signatures, and certificates to exact KB limits.
+                    <Typography variant="h6" fontWeight={700} gutterBottom>Image Optimizer</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Compress and resize images to exact KB limits.
                     </Typography>
-                    <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
-                      <Chip label="SSC Photo" size="small" />
-                      <Chip label="Signatures" size="small" />
-                      <Chip label="Custom KB" size="small" />
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                      <Chip label="Resize" size="small" variant="outlined" />
+                      <Chip label="KB Limit" size="small" variant="outlined" />
                     </Stack>
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
-                  <CardContent sx={{ p: 4 }}>
-                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1.5, bgcolor: 'secondary.main', borderRadius: 2, color: 'white' }}>
-                      <FileText size={32} />
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1, bgcolor: 'secondary.main', borderRadius: 2, color: 'white' }}>
+                      <FileText size={24} />
                     </Box>
-                    <Typography variant="h5" fontWeight={700} gutterBottom>Images to PDF</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                       Combine multiple JPG or PNG images into a single PDF document instantly.
+                    <Typography variant="h6" fontWeight={700} gutterBottom>Images to PDF</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                       Convert multiple JPG/PNG into a single PDF.
                     </Typography>
-                    <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
-                       <Chip label="JPG & PNG" size="small" />
-                       <Chip label="Multi-image" size="small" />
-                       <Chip label="Reorder Pages" size="small" />
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                       <Chip label="Convert" size="small" variant="outlined" />
+                       <Chip label="Combine" size="small" variant="outlined" />
                     </Stack>
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
-                  <CardContent sx={{ p: 4 }}>
-                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1.5, bgcolor: '#4caf50', borderRadius: 2, color: 'white' }}>
-                      <FileText size={32} />
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1, bgcolor: '#4caf50', borderRadius: 2, color: 'white' }}>
+                      <FileText size={24} />
                     </Box>
-                    <Typography variant="h5" fontWeight={700} gutterBottom>PDF Merger</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                       Merge multiple PDF files into one clean document with custom page ordering.
+                    <Typography variant="h6" fontWeight={700} gutterBottom>PDF Merger</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                       Combine multiple PDFs with custom ordering.
                     </Typography>
-                    <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
-                       <Chip label="Rearrange" size="small" />
-                       <Chip label="Merge Local" size="small" />
-                       <Chip label="Fast" size="small" />
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                       <Chip label="Merge" size="small" variant="outlined" />
+                       <Chip label="Reorder" size="small" variant="outlined" />
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+                <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1, bgcolor: '#ff9800', borderRadius: 2, color: 'white' }}>
+                      <Download size={24} />
+                    </Box>
+                    <Typography variant="h6" fontWeight={700} gutterBottom>PDF to Image</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                       Extract pages as high-quality JPG images.
+                    </Typography>
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                       <Chip label="Extract" size="small" variant="outlined" />
+                       <Chip label="JPG" size="small" variant="outlined" />
                     </Stack>
                   </CardContent>
                 </Card>
@@ -137,23 +152,30 @@ export default function Home() {
             {/* Interactive Tools */}
             <Box sx={{ py: 4 }}>
               <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
-                Image Optimization Tool
+                Image Optimization
               </Typography>
               <ImageOptimizer />
               
               <Divider sx={{ my: 10 }} />
               
               <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
-                Images to PDF Converter
+                Images to PDF
               </Typography>
               <PDFOptimizer />
 
               <Divider sx={{ my: 10 }} />
               
               <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
-                PDF Merger Tool
+                PDF Merger
               </Typography>
               <PDFMerger />
+
+              <Divider sx={{ my: 10 }} />
+              
+              <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
+                PDF to Image
+              </Typography>
+              <PDFToImage />
             </Box>
 
           </Container>
@@ -164,4 +186,3 @@ export default function Home() {
     </Box>
   );
 }
-

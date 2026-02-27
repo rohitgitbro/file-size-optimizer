@@ -26,6 +26,7 @@ export function Header() {
             <Button component={Link} href="/image-optimizer" color="inherit">Images</Button>
             <Button component={Link} href="/pdf-converter" color="inherit">Images to PDF</Button>
             <Button component={Link} href="/pdf-merger" color="inherit">PDF Merger</Button>
+            <Button component={Link} href="/pdf-to-image" color="inherit">PDF to Image</Button>
             <Button component={Link} href="/" color="inherit">Tools</Button>
           </Box>
 
