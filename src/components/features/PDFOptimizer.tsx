@@ -4,7 +4,8 @@
 import React, { useState, useRef } from 'react';
 import { 
   Box, Card, CardContent, Typography, Button, TextField, 
-  Slider, Grid, Chip, Stack, CircularProgress, Alert, Divider
+  Slider, Grid, Chip, Stack, CircularProgress, Alert,
+  Radio, RadioGroup, FormControlLabel
 } from '@mui/material';
 import { Upload, Download, RefreshCw, FileText } from 'lucide-react';
 import { formatFileSize } from '@/lib/image-utils';
@@ -12,7 +13,7 @@ import { compressPDF } from '@/lib/pdf-utils';
 
 export function PDFOptimizer() {
   const [file, setFile] = useState<File | null>(null);
-  const [targetSize, setTargetSize] = useState<number>(500);
+  const [targetSize, setTargetSize] = useState<number>(300);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<{ blob: Uint8Array; url: string; size: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,12 +32,15 @@ export function PDFOptimizer() {
     }
   };
 
-  const handleProcess = async () => {
+  const handleProcess = async (sizeOverride?: number) => {
     if (!file) return;
     setIsProcessing(true);
     setError(null);
+    
+    const targetKB = sizeOverride !== undefined ? sizeOverride : targetSize;
+
     try {
-      const compressedBytes = await compressPDF(file, targetSize);
+      const compressedBytes = await compressPDF(file, targetKB);
       const blob = new Blob([compressedBytes.buffer as BlobPart], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       setResult({
@@ -100,40 +104,85 @@ export function PDFOptimizer() {
       {file && (
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 7 }}>
-
             <Card variant="outlined">
               <CardContent>
-                <Typography variant="subtitle2" gutterBottom fontWeight={700}>Target File Size (KB)</Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                  <Slider
-                    value={targetSize}
-                    onChange={(_, val) => setTargetSize(val as number)}
-                    min={50}
-                    max={2000}
-                    sx={{ flexGrow: 1 }}
-                  />
-                  <TextField
-                    size="small"
-                    value={targetSize}
-                    onChange={(e) => setTargetSize(Number(e.target.value))}
-                    sx={{ width: 80 }}
-                    type="number"
-                  />
-                </Box>
-
-                <Typography variant="subtitle2" gutterBottom fontWeight={700}>Quick Presets</Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 3 }}>
-                   <Chip label="Standard (500KB)" onClick={() => applyPreset(500)} />
-                   <Chip label="High Compression (200KB)" onClick={() => applyPreset(200)} />
-                   <Chip label="Documents (1MB)" onClick={() => applyPreset(1000)} />
+                <Typography variant="h6" fontWeight={800} sx={{ mb: 3 }}>
+                  Compression Level
+                </Typography>
+                
+                <Stack spacing={2}>
+                  {[
+                    { 
+                      id: 'extreme',
+                      title: 'EXTREME COMPRESSION', 
+                      desc: 'Less quality, high compression', 
+                      target: 100,
+                      color: '#f44336'
+                    },
+                    { 
+                      id: 'recommended',
+                      title: 'RECOMMENDED COMPRESSION', 
+                      desc: 'Good quality, good compression', 
+                      target: 300,
+                      color: '#f44336'
+                    },
+                    { 
+                      id: 'less',
+                      title: 'LESS COMPRESSION', 
+                      desc: 'High quality, less compression', 
+                      target: 1000,
+                      color: '#f44336'
+                    }
+                  ].map((level) => (
+                    <Box
+                      key={level.id}
+                      onClick={() => {
+                        setTargetSize(level.target);
+                        setTimeout(() => handleProcess(level.target), 0);
+                      }}
+                      sx={{
+                        p: 3,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        borderRadius: 2,
+                        border: '1px solid',
+                        borderColor: targetSize === level.target ? 'divider' : 'divider',
+                        bgcolor: targetSize === level.target ? 'action.selected' : 'background.paper',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                        }
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="subtitle2" fontWeight={700} sx={{ color: level.color, letterSpacing: 1 }}>
+                          {level.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {level.desc}
+                        </Typography>
+                      </Box>
+                      {targetSize === level.target && (
+                        <Box sx={{ 
+                          width: 24, height: 24, bgcolor: '#4caf50', borderRadius: '50%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                        }}>
+                          <Typography variant="caption" fontWeight={900}>✓</Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  ))}
                 </Stack>
 
                 <Button
+                  sx={{ mt: 4 }}
                   fullWidth
                   variant="contained"
                   size="large"
                   startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : <RefreshCw size={20} />}
-                  onClick={handleProcess}
+                  onClick={() => handleProcess()}
                   disabled={isProcessing}
                 >
                   {isProcessing ? 'Compressing...' : 'Compress PDF'}
@@ -143,9 +192,7 @@ export function PDFOptimizer() {
           </Grid>
 
           <Grid size={{ xs: 12, md: 5 }}>
-
-
-            {result ? (
+            {result && file ? (
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'primary.dark', color: 'white' }}>
                 <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <Typography variant="h6" gutterBottom>Compression Result</Typography>

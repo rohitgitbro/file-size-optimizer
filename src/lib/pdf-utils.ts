@@ -8,11 +8,7 @@ export const compressPDF = async (
   const arrayBuffer = await file.arrayBuffer();
   const pdfDoc = await PDFDocument.load(arrayBuffer);
   
-  // NOTE: True PDF compression in the browser without server-side tools 
-  // like Ghostscript is limited. We mostly rely on object squeezing and 
-  // dropping metadata here. For heavy compression, we'd typically downscale images inside.
-  
-  // Strip metadata and minimize
+  // Strip metadata as a baseline
   pdfDoc.setTitle('');
   pdfDoc.setAuthor('');
   pdfDoc.setSubject('');
@@ -20,10 +16,13 @@ export const compressPDF = async (
   pdfDoc.setProducer('');
   pdfDoc.setCreator('');
 
-  const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+  // Squeeze objects
+  const pdfBytes = await pdfDoc.save({ 
+    useObjectStreams: true,
+    addDefaultPage: false,
+  });
   
-  // If it's still too big, we'd need a more advanced strategy like re-rendering pages
-  // to canvas and then back to PDF with lower quality images.
+  
   
   return pdfBytes;
 };
