@@ -101,14 +101,14 @@ export default function Home() {
                     <Box sx={{ mb: 2, display: 'inline-flex', p: 1.5, bgcolor: 'secondary.main', borderRadius: 2, color: 'white' }}>
                       <FileText size={32} />
                     </Box>
-                    <Typography variant="h5" fontWeight={700} gutterBottom>PDF Compressor</Typography>
+                    <Typography variant="h5" fontWeight={700} gutterBottom>Images to PDF</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                      Reduce PDF size for document uploads while keeping text crystal clear.
+                       Combine multiple JPG or PNG images into a single PDF document instantly.
                     </Typography>
                     <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
-                      <Chip label="Standard" size="small" />
-                      <Chip label="Multi-page" size="small" />
-                      <Chip label="Fast" size="small" />
+                       <Chip label="JPG & PNG" size="small" />
+                       <Chip label="Multi-image" size="small" />
+                       <Chip label="Reorder Pages" size="small" />
                     </Stack>
                   </CardContent>
                 </Card>
@@ -125,7 +125,7 @@ export default function Home() {
               <Divider sx={{ my: 10 }} />
               
               <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
-                PDF Compression Tool
+                Images to PDF Converter
               </Typography>
               <PDFOptimizer />
             </Box>

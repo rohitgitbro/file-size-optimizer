@@ -14,15 +14,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "GovForm Optimizer | Image & PDF Compressor for SSC, UPSC, Govt Exams",
-  description: "Precision image and PDF size optimizer for Indian government job applications. Compressed files to exact KB (50KB, 100KB) for SSC, UPSC, and more with 100% privacy.",
-  keywords: "image compressor, pdf compressor, ssc image resize, upsc photo resize, gov form photo tool, india govt exam photo optimizer",
+  title: "GovFormTools | Free Image Optimizer & Images to PDF Converter",
+  description: "Free online tools to compress images and convert images to PDF. 100% private — all processing happens in your browser. No uploads, no data stored.",
+  keywords: "image compressor, images to pdf, compress image online, convert jpg to pdf, png to pdf, reduce image size, photo optimizer",
   openGraph: {
-    title: "GovForm Optimizer | Precise Image & PDF Compressor",
-    description: "Fast, private image and PDF compression for government forms.",
+    title: "GovFormTools | Free Image Optimizer & Images to PDF Converter",
+    description: "Free online tools — compress images and convert images to PDF. 100% private, runs in your browser.",
     type: "website",
     locale: "en_IN",
-    siteName: "GovForm Optimizer",
+    siteName: "GovFormTools",
   },
   robots: {
     index: true,

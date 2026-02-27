@@ -18,13 +18,13 @@ export function Header() {
           <Box display="flex" alignItems="center" component={Link} href="/" sx={{ textDecoration: 'none', color: 'inherit', flexGrow: 1 }}>
             <Camera sx={{ mr: 1, color: 'primary.main', fontSize: 28 }} />
             <Typography variant="h6" component="div" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
-              GovForm<Box component="span" sx={{ color: 'primary.main' }}>Optimizer</Box>
+              GovForm<Box component="span" sx={{ color: 'primary.main' }}>Tools</Box>
             </Typography>
           </Box>
           
           <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
             <Button component={Link} href="/image-optimizer" color="inherit">Images</Button>
-            <Button component={Link} href="/pdf-optimizer" color="inherit">PDFs</Button>
+            <Button component={Link} href="/pdf-converter" color="inherit">PDF Converter</Button>
             <Button component={Link} href="/" color="inherit">Tools</Button>
           </Box>
 

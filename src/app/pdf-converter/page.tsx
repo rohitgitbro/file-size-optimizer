@@ -28,7 +28,7 @@ export default function PDFOptimizerPage() {
               <Home size={16} style={{ marginRight: 8 }} />
               Home
             </MuiLink>
-            <Typography color="text.primary">PDF Compressor</Typography>
+            <Typography color="text.primary">Images to PDF</Typography>
           </Breadcrumbs>
 
           <PDFOptimizer />
