@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Container, Box, Typography, Breadcrumbs, Link as MuiLink } from '@mui/material';
-import { PDFToImage } from '@/components/features/PDFToImage';
+import { PDFHybridTool } from '@/components/features/PDFHybridTool';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import Link from 'next/link';
@@ -28,10 +28,10 @@ export default function PDFToImagePage() {
               <Home size={16} style={{ marginRight: 8 }} />
               Home
             </MuiLink>
-            <Typography color="text.primary">PDF to Image</Typography>
+            <Typography color="text.primary">PDF Surgical Editor</Typography>
           </Breadcrumbs>
 
-          <PDFToImage />
+          <PDFHybridTool />
         </Container>
       </Box>
 

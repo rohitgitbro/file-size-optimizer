@@ -5,7 +5,7 @@ import { Footer } from '@/components/common/Footer';
 import { ImageOptimizer } from '@/components/features/ImageOptimizer';
 import { PDFOptimizer } from '@/components/features/PDFOptimizer';
 import { PDFMerger } from '@/components/features/PDFMerger';
-import { PDFToImage } from '@/components/features/PDFToImage';
+import { PDFHybridTool } from '@/components/features/PDFHybridTool';
 import Link from 'next/link';
 
 export default function Home() {
@@ -131,22 +131,23 @@ export default function Home() {
                 </Card>
               </Grid>
               <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-                <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
+                <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' }, cursor: 'pointer' }}>
                   <CardContent sx={{ p: 3 }}>
                     <Box sx={{ mb: 2, display: 'inline-flex', p: 1, bgcolor: '#ff9800', borderRadius: 2, color: 'white' }}>
                       <Download size={24} />
                     </Box>
-                    <Typography variant="h6" fontWeight={700} gutterBottom>PDF to Image</Typography>
+                    <Typography variant="h6" fontWeight={700} gutterBottom>PDF Surgical Editor</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                       Extract pages as high-quality JPG images.
+                       Deconstruct PDF into images, optimize, and rebuild.
                     </Typography>
                     <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                       <Chip label="Extract" size="small" variant="outlined" />
-                       <Chip label="JPG" size="small" variant="outlined" />
+                       <Chip label="Hybrid" size="small" color="primary" />
+                       <Chip label="Rebuild PDF" size="small" variant="outlined" />
                     </Stack>
                   </CardContent>
                 </Card>
               </Grid>
+
             </Grid>
 
             {/* Interactive Tools */}
@@ -173,9 +174,9 @@ export default function Home() {
               <Divider sx={{ my: 10 }} />
               
               <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
-                PDF to Image
+                PDF Surgical Editor
               </Typography>
-              <PDFToImage />
+              <PDFHybridTool />
             </Box>
 
           </Container>

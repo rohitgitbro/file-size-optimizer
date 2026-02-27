@@ -63,17 +63,29 @@ export const mergePDFs = async (
  */
 export const pdfToImages = async (
   file: File,
-  onProgress?: (percent: number) => void
+  options: {
+    format?: 'image/jpeg' | 'image/png' | 'image/webp',
+    scale?: number,
+    quality?: number,
+    onProgress?: (percent: number) => void
+  } = {}
 ): Promise<{ blob: Blob; name: string }[]> => {
+  const { format = 'image/jpeg', scale = 2.0, quality = 0.9, onProgress } = options;
   const arrayBuffer = await file.arrayBuffer();
   const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
   const pdf = await loadingTask.promise;
   const numPages = pdf.numPages;
   const result: { blob: Blob; name: string }[] = [];
 
+  const extMap = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp'
+  };
+
   for (let i = 1; i <= numPages; i++) {
     const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 2.0 }); // High resolution
+    const viewport = page.getViewport({ scale });
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d')!;
     canvas.width = viewport.width;
@@ -82,12 +94,12 @@ export const pdfToImages = async (
     await page.render({ canvasContext: context, viewport } as any).promise;
     
     const blob = await new Promise<Blob>((resolve) => 
-      canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.9)
+      canvas.toBlob((b) => resolve(b!), format, quality)
     );
     
     result.push({
       blob,
-      name: `page-${i}.jpg`
+      name: `page-${i}.${extMap[format]}`
     });
 
     if (onProgress) {
@@ -99,3 +111,4 @@ export const pdfToImages = async (
 
   return result;
 };
+
