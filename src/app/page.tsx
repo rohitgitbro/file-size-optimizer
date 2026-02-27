@@ -4,6 +4,7 @@ import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { ImageOptimizer } from '@/components/features/ImageOptimizer';
 import { PDFOptimizer } from '@/components/features/PDFOptimizer';
+import { PDFMerger } from '@/components/features/PDFMerger';
 import Link from 'next/link';
 
 export default function Home() {
@@ -77,7 +78,7 @@ export default function Home() {
             </Box>
 
             <Grid container spacing={4} sx={{ mb: 10 }}>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
                   <CardContent sx={{ p: 4 }}>
                     <Box sx={{ mb: 2, display: 'inline-flex', p: 1.5, bgcolor: 'primary.light', borderRadius: 2, color: 'white' }}>
@@ -95,7 +96,7 @@ export default function Home() {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
                   <CardContent sx={{ p: 4 }}>
                     <Box sx={{ mb: 2, display: 'inline-flex', p: 1.5, bgcolor: 'secondary.main', borderRadius: 2, color: 'white' }}>
@@ -109,6 +110,24 @@ export default function Home() {
                        <Chip label="JPG & PNG" size="small" />
                        <Chip label="Multi-image" size="small" />
                        <Chip label="Reorder Pages" size="small" />
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
+                  <CardContent sx={{ p: 4 }}>
+                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1.5, bgcolor: '#4caf50', borderRadius: 2, color: 'white' }}>
+                      <FileText size={32} />
+                    </Box>
+                    <Typography variant="h5" fontWeight={700} gutterBottom>PDF Merger</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                       Merge multiple PDF files into one clean document with custom page ordering.
+                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
+                       <Chip label="Rearrange" size="small" />
+                       <Chip label="Merge Local" size="small" />
+                       <Chip label="Fast" size="small" />
                     </Stack>
                   </CardContent>
                 </Card>
@@ -128,7 +147,15 @@ export default function Home() {
                 Images to PDF Converter
               </Typography>
               <PDFOptimizer />
+
+              <Divider sx={{ my: 10 }} />
+              
+              <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
+                PDF Merger Tool
+              </Typography>
+              <PDFMerger />
             </Box>
+
           </Container>
         </Box>
       </Box>

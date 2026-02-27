@@ -28,3 +28,27 @@ export const imagesToPDF = async (images: File[]): Promise<Uint8Array> => {
 
   return await pdfDoc.save({ useObjectStreams: true });
 };
+
+/**
+ * Merges multiple PDF files into a single PDF document.
+ */
+export const mergePDFs = async (
+  pdfFiles: File[],
+  onProgress?: (percent: number) => void
+): Promise<Uint8Array> => {
+  const mergedPdf = await PDFDocument.create();
+  
+  for (let i = 0; i < pdfFiles.length; i++) {
+    const file = pdfFiles[i];
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(arrayBuffer);
+    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+    copiedPages.forEach((page) => mergedPdf.addPage(page));
+    
+    if (onProgress) {
+      onProgress(Math.round(((i + 1) / pdfFiles.length) * 100));
+    }
+  }
+
+  return await mergedPdf.save({ useObjectStreams: true });
+};
