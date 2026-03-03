@@ -6,12 +6,12 @@ import {
   Box, Card, CardContent, Typography, Button,
   Grid, Stack, IconButton, Alert, CircularProgress, LinearProgress, Divider, Tooltip
 } from '@mui/material';
-import { FileText, Download, RefreshCw, ArrowUp, ArrowDown, Files, Trash2 } from 'lucide-react';
+import { FileText, Download, RefreshCw, Files, Trash2, GripVertical } from 'lucide-react';
 import { formatFileSize } from '@/lib/image-utils';
 import { mergePDFs } from '@/lib/pdf-utils';
 import { FileDropzone } from '../common/FileDropzone';
 import { ToolLayout } from '../common/ToolLayout';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, Reorder } from 'framer-motion';
 
 interface PDFItem {
   file: File;
@@ -165,23 +165,34 @@ export function PDFMerger() {
 
         <Grid size={{ xs: 12, md: 7 }}>
           <Stack spacing={2}>
-            <AnimatePresence>
+            <Reorder.Group
+              axis="y"
+              values={pdfs}
+              onReorder={setPdfs}
+              style={{ listStyle: 'none', padding: 0, margin: 0 }}
+            >
               {pdfs.length > 0 ? (
-                pdfs.map((item, index) => (
-                  <motion.div
+                pdfs.map((item) => (
+                  <Reorder.Item
                     key={item.id}
+                    value={item}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    layout
                   >
                     <Card variant="outlined" sx={{ 
                       display: 'flex', 
                       alignItems: 'center', 
                       p: 2,
+                      mb: 2,
                       transition: 'all 0.2s',
+                      cursor: 'grab',
+                      '&:active': { cursor: 'grabbing' },
                       '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' }
                     }}>
+                      <Box sx={{ color: 'text.disabled', mr: 2, display: 'flex', alignItems: 'center' }}>
+                        <GripVertical size={20} />
+                      </Box>
                       <Box sx={{ p: 1, bgcolor: 'primary.light', borderRadius: 2, color: 'white', mr: 2 }}>
                         <FileText size={24} />
                       </Box>
@@ -190,31 +201,23 @@ export function PDFMerger() {
                         <Typography variant="caption" color="text.secondary">{formatFileSize(item.file.size)}</Typography>
                       </Box>
                       
-                      <Stack direction="row" spacing={0.5}>
-                        <Tooltip title="Move Up">
-                          <IconButton size="small" onClick={() => movePDF(index, 'up')} disabled={index === 0}>
-                            <ArrowUp size={18} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Move Down">
-                          <IconButton size="small" onClick={() => movePDF(index, 'down')} disabled={index === pdfs.length - 1}>
-                            <ArrowDown size={18} />
-                          </IconButton>
-                        </Tooltip>
+                      <Stack direction="row" spacing={0.5} alignItems="center">
                         <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                        <IconButton size="small" color="error" onClick={() => removePDF(item.id)}>
-                          <Trash2 size={18} />
-                        </IconButton>
+                        <Tooltip title="Remove File">
+                          <IconButton size="small" color="error" onClick={() => removePDF(item.id)}>
+                            <Trash2 size={18} />
+                          </IconButton>
+                        </Tooltip>
                       </Stack>
                     </Card>
-                  </motion.div>
+                  </Reorder.Item>
                 ))
               ) : (
                 <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed', borderColor: 'divider', borderRadius: 4 }}>
                   <Typography color="text.secondary">Queue is empty. Add some PDFs to begin.</Typography>
                 </Box>
               )}
-            </AnimatePresence>
+            </Reorder.Group>
           </Stack>
         </Grid>
       </Grid>

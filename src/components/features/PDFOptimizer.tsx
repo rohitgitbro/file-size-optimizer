@@ -5,9 +5,10 @@ import React, { useState, useCallback } from 'react';
 import {
   Box, Card, CardContent, Typography, Button,
   Grid, Stack, IconButton, Alert, CircularProgress, 
-  FormControl, InputLabel, Select, MenuItem, Slider, Divider
-} from '@mui/material';
-import { X, Download, RefreshCw, ArrowUp, ArrowDown, Settings, Layout, Scale } from 'lucide-react';
+  FormControl, InputLabel, Select, MenuItem, Slider, Divider,
+  Chip, Tooltip, Pagination
+} from "@mui/material";
+import { X, Download, RefreshCw, Settings, Layout, Scale, GripVertical, Trash2 } from 'lucide-react';
 import { formatFileSize } from '@/lib/image-utils';
 import { imagesToPDF, PDFOptions } from '@/lib/pdf-utils';
 import { FileDropzone } from '../common/FileDropzone';
@@ -32,6 +33,9 @@ export function PDFOptimizer() {
     orientation: 'portrait',
     margin: 20
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   const addImages = useCallback((files: FileList | File[]) => {
     const fileArray = Array.from(files);
@@ -64,12 +68,23 @@ export function PDFOptimizer() {
     setResult(null);
   };
 
-  const moveImage = (index: number, direction: 'up' | 'down') => {
-    const newImages = [...images];
-    const swapIndex = direction === 'up' ? index - 1 : index + 1;
-    if (swapIndex < 0 || swapIndex >= newImages.length) return;
-    [newImages[index], newImages[swapIndex]] = [newImages[swapIndex], newImages[index]];
-    setImages(newImages);
+  const handleDragEnd = (draggedItem: ImageItem, targetIndex: number) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const oldIndex = images.findIndex(p => p.id === draggedItem.id);
+    const newIndex = startIndex + targetIndex;
+    
+    if (oldIndex === newIndex) return;
+    
+    setPagesArray(prev => {
+      const next = [...prev];
+      const [removed] = next.splice(oldIndex, 1);
+      next.splice(newIndex, 0, removed);
+      return next;
+    });
+  };
+
+  const setPagesArray = (updater: (prev: ImageItem[]) => ImageItem[]) => {
+    setImages(prev => updater(prev));
   };
 
   const handleConvert = async () => {
@@ -203,41 +218,198 @@ export function PDFOptimizer() {
               subtitle="JPG or PNG images supported"
             />
 
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               {images.length > 0 && (
                 <Box>
-                  <Typography variant="h6" fontWeight={800} sx={{ mb: 2 }}>Page Ordering</Typography>
-                  <Grid container spacing={2}>
-                    {images.map((item, index) => (
-                      <Grid size={{ xs: 6, sm: 4, lg: 3 }} key={item.id}>
-                        <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                          <Card sx={{ position: 'relative', overflow: 'hidden', height: '100%' }}>
-                            <Box sx={{ height: 140, bgcolor: 'action.hover', position: 'relative' }}>
-                              <img src={item.preview} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="page" />
-                              <Box sx={{ position: 'absolute', top: 4, left: 4, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', px: 1, borderRadius: 1, fontSize: '10px', fontWeight: 900 }}>
-                                PAGE {index + 1}
-                              </Box>
-                              <IconButton 
-                                size="small" 
-                                sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(255,255,255,0.8)', '&:hover': { bgcolor: '#fff' } }}
-                                onClick={() => removeImage(item.id)}
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+                    <Typography variant="h6" fontWeight={900}>Document Assembly</Typography>
+                    <Chip 
+                      label={`${images.length} Pages`} 
+                      color="secondary" 
+                      size="small" 
+                      sx={{ fontWeight: 900, borderRadius: 2 }} 
+                    />
+                  </Stack>
+
+                  <Box
+                    sx={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', 
+                      gap: '20px',
+                      padding: '12px 6px 32px 6px'
+                    }}
+                  >
+                    {images.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((item, idx) => {
+                      const absoluteIdx = (currentPage - 1) * itemsPerPage + idx;
+                      return (
+                        <motion.div
+                          key={item.id}
+                          layout
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          whileHover={{ y: -5 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        >
+                          <Card
+                            sx={{
+                              height: "100%",
+                              borderRadius: '12px',
+                              overflow: "hidden",
+                              border: "1px solid",
+                              borderColor: "divider",
+                              position: "relative",
+                              bgcolor: 'background.paper',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                              transition: 'all 0.2s ease',
+                              "&:hover": { 
+                                borderColor: 'primary.main',
+                                boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
+                                "& .page-actions": { opacity: 1 } 
+                              },
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                position: "relative",
+                                height: 220,
+                                bgcolor: theme => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                p: 1.5
+                              }}
+                            >
+                              <img
+                                src={item.preview}
+                                style={{
+                                  maxWidth: "100%",
+                                  maxHeight: "100%",
+                                  objectFit: "contain",
+                                  pointerEvents: "none",
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                  backgroundColor: '#fff',
+                                  padding: '2px'
+                                }}
+                                alt={`page ${absoluteIdx + 1}`}
+                              />
+
+                              {/* Page Label */}
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  top: 8,
+                                  left: 8,
+                                  bgcolor: "secondary.main",
+                                  color: "white",
+                                  px: 1,
+                                  minWidth: 20,
+                                  height: 20,
+                                  borderRadius: '6px',
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: '11px',
+                                  fontWeight: 900,
+                                  boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                                  zIndex: 3
+                                }}
                               >
-                                <X size={14} color="#d32f2f" />
-                              </IconButton>
+                                {absoluteIdx + 1}
+                              </Box>
+
+                              {/* Drag Handle & Selection Overlay */}
+                              <Box 
+                                sx={{ 
+                                  position: 'absolute', 
+                                  inset: 0, 
+                                  cursor: 'grab', 
+                                  '&:active': { cursor: 'grabbing' },
+                                  zIndex: 1
+                                }}
+                                draggable
+                                onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
+                                  e.dataTransfer.setData('text/plain', absoluteIdx.toString());
+                                  if (e.currentTarget.parentElement) {
+                                    e.currentTarget.parentElement.style.opacity = '0.4';
+                                  }
+                                }}
+                                onDragEnd={(e: React.DragEvent<HTMLDivElement>) => {
+                                  if (e.currentTarget.parentElement) {
+                                    e.currentTarget.parentElement.style.opacity = '1';
+                                  }
+                                }}
+                                onDragOver={(e: React.DragEvent<HTMLDivElement>) => e.preventDefault()}
+                                onDrop={(e: React.DragEvent<HTMLDivElement>) => {
+                                  e.preventDefault();
+                                  const fromIdxStr = e.dataTransfer.getData('text/plain');
+                                  const fromIdx = parseInt(fromIdxStr);
+                                  if (!isNaN(fromIdx) && fromIdx !== absoluteIdx) {
+                                    handleDragEnd(images[fromIdx], idx);
+                                  }
+                                }}
+                              >
+                                <Box sx={{ position: 'absolute', top: 8, right: 8, color: 'text.disabled', zIndex: 3 }}>
+                                  <GripVertical size={16} />
+                                </Box>
+                              </Box>
+
+                              {/* Hover Actions */}
+                              <Box
+                                className="page-actions"
+                                sx={{
+                                  position: "absolute",
+                                  bottom: 8,
+                                  left: "50%",
+                                  transform: "translateX(-50%)",
+                                  bgcolor: "background.paper",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  gap: 0.5,
+                                  p: 0.5,
+                                  borderRadius: '8px',
+                                  opacity: 0,
+                                  transition: "all 0.2s ease",
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                  zIndex: 5
+                                }}
+                              >
+                                <Tooltip title="Remove Page">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => removeImage(item.id)}
+                                    sx={{ 
+                                      color: "error.main",
+                                      p: 0.5
+                                    }}
+                                  >
+                                    <Trash2 size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
                             </Box>
-                            <Stack direction="row" spacing={0.5} justifyContent="center" sx={{ p: 1 }}>
-                              <IconButton size="small" onClick={() => moveImage(index, 'up')} disabled={index === 0}>
-                                <ArrowUp size={14} />
-                              </IconButton>
-                              <IconButton size="small" onClick={() => moveImage(index, 'down')} disabled={index === images.length - 1}>
-                                <ArrowDown size={14} />
-                              </IconButton>
-                            </Stack>
                           </Card>
                         </motion.div>
-                      </Grid>
-                    ))}
-                  </Grid>
+                      );
+                    })}
+                  </Box>
+
+                  {images.length > itemsPerPage && (
+                    <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+                      <Pagination 
+                        count={Math.ceil(images.length / itemsPerPage)} 
+                        page={currentPage} 
+                        onChange={(_: React.ChangeEvent<unknown>, v: number) => setCurrentPage(v)}
+                        color="secondary"
+                        sx={{
+                          "& .MuiPaginationItem-root": { fontWeight: 900, borderRadius: 2 }
+                        }}
+                      />
+                    </Box>
+                  )}
                 </Box>
               )}
             </AnimatePresence>

@@ -10,12 +10,12 @@ import {
 import { 
   Download, RefreshCw, Trash2,  
   Minimize, Lock, Unlock,
-  Settings2, ChevronRight, AlertCircle, Sparkles
+  Settings2, ChevronRight, AlertCircle, Sparkles, GripVertical
 } from 'lucide-react';
 import { compressImage, formatFileSize } from '@/lib/image-utils';
 import { FileDropzone } from '../common/FileDropzone';
 import { ToolLayout } from '../common/ToolLayout';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 
 interface OptimizedResult {
   file: File;
@@ -336,90 +336,101 @@ export function ImageOptimizer() {
                     </Button>
                   </Box>
                   
-                  <Grid container spacing={2}>
+                  <Reorder.Group
+                    axis="y"
+                    values={results}
+                    onReorder={setResults}
+                    style={{ listStyle: 'none', padding: 0 }}
+                  >
                     {results.map((item) => (
-                      <Grid size={{ xs: 12 }} key={item.id}>
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
+                      <Reorder.Item
+                        key={item.id}
+                        value={item}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                      >
+                        <Card 
+                          variant="outlined" 
+                          sx={{ 
+                            p: 2, 
+                            mb: 2,
+                            borderRadius: 4,
+                            display: 'flex', 
+                            alignItems: 'center',
+                            borderColor: item.status === 'done' ? 'secondary.main' : 'divider',
+                            transition: 'all 0.3s ease',
+                            '&:hover': { boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }
+                          }}
                         >
-                          <Card 
-                            variant="outlined" 
-                            sx={{ 
-                              p: 2, 
-                              borderRadius: 4,
-                              display: 'flex', 
-                              alignItems: 'center',
-                              borderColor: item.status === 'done' ? 'secondary.main' : 'divider',
-                              transition: 'all 0.3s ease',
-                              '&:hover': { boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }
-                            }}
-                          >
-                            {/* Thumbnail */}
-                            <Box sx={{ width: 80, height: 80, borderRadius: 2, bgcolor: 'action.hover', overflow: 'hidden', flexShrink: 0, border: '1px solid', borderColor: 'divider' }}>
-                              <img 
-                                src={item.status === 'done' ? item.url : URL.createObjectURL(item.file)} 
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                                alt="asset"
-                              />
-                            </Box>
-                            
-                            {/* Meta */}
-                            <Box sx={{ ml: 2.5, flex: 1, minWidth: 0 }}>
-                              <Typography variant="body2" fontWeight={900} sx={{ mb: 0.5 }} noWrap>{item.file.name}</Typography>
-                              <Stack direction="row" spacing={2} alignItems="center">
-                                <Stack direction="row" alignItems="center" spacing={0.5}>
-                                  <Minimize size={14} color="#666" />
-                                  <Typography variant="caption" fontWeight={700} color="text.secondary">{formatFileSize(item.originalSize)}</Typography>
-                                </Stack>
-                                {item.status === 'done' && (
-                                  <>
-                                    <ChevronRight size={14} color="#ccc" />
-                                    <Typography variant="caption" fontWeight={900} color="secondary.main">{formatFileSize(item.optimizedSize)}</Typography>
-                                    <Typography variant="caption" sx={{ bgcolor: 'secondary.main', color: 'white', px: 1, borderRadius: 1, fontWeight: 900, fontSize: '0.6rem' }}>
-                                      -{Math.round((1 - item.optimizedSize / item.originalSize) * 100)}%
-                                    </Typography>
-                                  </>
-                                )}
-                              </Stack>
-                            </Box>
+                          {/* Drag Handle */}
+                          <Box sx={{ color: 'text.disabled', mr: 2, cursor: 'grab', '&:active': { cursor: 'grabbing' } }}>
+                            <GripVertical size={20} />
+                          </Box>
 
-                            {/* Actions */}
-                            <Stack direction="row" spacing={1} sx={{ ml: 2 }}>
-                              {item.status === 'processing' && <CircularProgress size={24} />}
+                          {/* Thumbnail */}
+                          <Box sx={{ width: 60, height: 60, borderRadius: 2, bgcolor: 'action.hover', overflow: 'hidden', flexShrink: 0, border: '1px solid', borderColor: 'divider' }}>
+                            <img 
+                              src={item.status === 'done' ? item.url : (item.file ? URL.createObjectURL(item.file) : '')} 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                              alt="asset"
+                            />
+                          </Box>
+                          
+                          {/* Meta */}
+                          <Box sx={{ ml: 2.5, flex: 1, minWidth: 0 }}>
+                            <Typography variant="body2" fontWeight={900} sx={{ mb: 0.5 }} noWrap>{item.file.name}</Typography>
+                            <Stack direction="row" spacing={2} alignItems="center">
+                              <Stack direction="row" alignItems="center" spacing={0.5}>
+                                <Minimize size={14} color="#666" />
+                                <Typography variant="caption" fontWeight={700} color="text.secondary">{formatFileSize(item.originalSize)}</Typography>
+                              </Stack>
                               {item.status === 'done' && (
-                                <Button 
-                                  variant="contained" 
-                                  color="secondary" 
-                                  size="small" 
-                                  onClick={() => downloadResult(item)}
-                                  startIcon={<Download size={14} />}
-                                  sx={{ borderRadius: 2, fontWeight: 900 }}
-                                >
-                                  Get
-                                </Button>
+                                <>
+                                  <ChevronRight size={14} color="#ccc" />
+                                  <Typography variant="caption" fontWeight={900} color="secondary.main">{formatFileSize(item.optimizedSize)}</Typography>
+                                  <Typography variant="caption" sx={{ bgcolor: 'secondary.main', color: 'white', px: 1, borderRadius: 1, fontWeight: 900, fontSize: '0.6rem' }}>
+                                    -{Math.round((1 - item.optimizedSize / item.originalSize) * 100)}%
+                                  </Typography>
+                                </>
                               )}
-                              {item.status === 'idle' && (
-                                <IconButton size="small" onClick={() => processImage(item)} color="primary">
-                                  <RefreshCw size={18} />
-                                </IconButton>
-                              )}
-                              <IconButton 
-                                size="small" 
-                                color="error" 
-                                onClick={() => removeResult(item.id)} 
-                                disabled={item.isProcessing}
-                                sx={{ ml: 1 }}
-                              >
-                                <Trash2 size={18} />
-                              </IconButton>
                             </Stack>
-                          </Card>
-                        </motion.div>
-                      </Grid>
+                          </Box>
+
+                          {/* Actions */}
+                          <Stack direction="row" spacing={1} sx={{ ml: 2 }}>
+                            {item.status === 'processing' && <CircularProgress size={24} />}
+                            {item.status === 'done' && (
+                              <Button 
+                                variant="contained" 
+                                color="secondary" 
+                                size="small" 
+                                onClick={() => downloadResult(item)}
+                                startIcon={<Download size={14} />}
+                                sx={{ borderRadius: 2, fontWeight: 900 }}
+                              >
+                                Get
+                              </Button>
+                            )}
+                            {item.status === 'idle' && (
+                              <IconButton size="small" onClick={() => processImage(item)} color="primary">
+                                <RefreshCw size={18} />
+                              </IconButton>
+                            )}
+                            <IconButton 
+                              size="small" 
+                              color="error" 
+                              onClick={() => removeResult(item.id)} 
+                              disabled={item.isProcessing}
+                              sx={{ ml: 1 }}
+                            >
+                              <Trash2 size={18} />
+                            </IconButton>
+                          </Stack>
+                        </Card>
+                      </Reorder.Item>
                     ))}
-                  </Grid>
+                  </Reorder.Group>
                 </Stack>
               )}
             </AnimatePresence>

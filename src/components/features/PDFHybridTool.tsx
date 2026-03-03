@@ -14,16 +14,16 @@ import {
   IconButton,
   Tooltip,
   Chip,
+  Pagination,
 } from "@mui/material";
 import {
   Save,
   Scissors,
   Layers,
   Trash2,
-  ArrowUp,
-  ArrowDown,
   Download,
   Zap,
+  GripVertical
 } from "lucide-react";
 import { formatFileSize } from "@/lib/image-utils";
 import { pdfToImages, imagesToPDF } from "@/lib/pdf-utils";
@@ -45,6 +45,8 @@ export function PDFHybridTool() {
   const [processType, setProcessType] = useState<"scan" | "export" | null>(
     null,
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   const handleFileSelected = useCallback(async (files: FileList | File[]) => {
     const selectedFile = files[0];
@@ -87,13 +89,24 @@ export function PDFHybridTool() {
     });
   };
 
-  const movePage = (index: number, direction: "up" | "down") => {
-    const newIdx = direction === "up" ? index - 1 : index + 1;
-    if (newIdx < 0 || newIdx >= pages.length) return;
+  const onReorder = (newOrder: PageItem[]) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const newPages = [...pages];
+    newPages.splice(startIndex, itemsPerPage, ...newOrder);
+    setPages(newPages);
+  };
 
-    setPages((prev) => {
+  const handleDragEnd = (draggedItem: PageItem, targetIndex: number) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const oldIndex = pages.findIndex(p => p.id === draggedItem.id);
+    const newIndex = startIndex + targetIndex;
+    
+    if (oldIndex === newIndex) return;
+    
+    setPages(prev => {
       const next = [...prev];
-      [next[index], next[newIdx]] = [next[newIdx], next[index]];
+      const [removed] = next.splice(oldIndex, 1);
+      next.splice(newIndex, 0, removed);
       return next;
     });
   };
@@ -410,142 +423,185 @@ export function PDFHybridTool() {
                   animate={{ opacity: 1 }}
                   style={{ padding: 24 }}
                 >
-                  <Typography
-                    variant="h6"
-                    fontWeight={900}
-                    sx={{
-                      mb: 3,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
+                  <Box
+                    sx={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', 
+                      gap: '20px',
+                      padding: '12px 6px 32px 6px'
                     }}
                   >
-                    <Layers size={20} color="#9c27b0" /> Document Canvas
-                  </Typography>
-                  <Grid container spacing={2}>
-                    {pages.map((page, idx) => (
-                      <Grid size={{ xs: 6, sm: 4, lg: 3 }} key={page.id}>
-                        <Card
-                          sx={{
-                            height: "100%",
-                            borderRadius: 3,
-                            overflow: "hidden",
-                            border: "1px solid",
-                            borderColor: "divider",
-                            "&:hover .page-actions": { opacity: 1 },
-                          }}
+                    {pages.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((page, idx) => {
+                      const absoluteIdx = (currentPage - 1) * itemsPerPage + idx;
+                      return (
+                        <motion.div
+                          key={page.id}
+                          layout
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          whileHover={{ y: -5 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         >
-                          <Box
+                          <Card
                             sx={{
+                              height: "100%",
+                              borderRadius: '12px',
+                              overflow: "hidden",
+                              border: "1px solid",
+                              borderColor: "divider",
                               position: "relative",
-                              height: 200,
-                              bgcolor: "background.subtle",
+                              bgcolor: 'background.paper',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                              transition: 'all 0.2s ease',
+                              "&:hover": { 
+                                borderColor: 'primary.main',
+                                boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
+                                "& .page-actions": { opacity: 1 } 
+                              },
                             }}
                           >
-                            <img
-                              src={page.url}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "contain",
-                              }}
-                              alt={`page ${idx + 1}`}
-                            />
-
-                            {/* Page Label */}
                             <Box
                               sx={{
-                                position: "absolute",
-                                top: 8,
-                                left: 8,
-                                bgcolor: "secondary.main",
-                                color: "white",
-                                width: 24,
-                                height: 24,
-                                borderRadius: "50%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: 10,
-                                fontWeight: 900,
-                                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                                position: "relative",
+                                height: 220,
+                                bgcolor: theme => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                p: 1.5
                               }}
                             >
-                              {idx + 1}
-                            </Box>
+                              <img
+                                src={page.url}
+                                style={{
+                                  maxWidth: "100%",
+                                  maxHeight: "100%",
+                                  objectFit: "contain",
+                                  pointerEvents: "none",
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                  backgroundColor: '#fff',
+                                  padding: '2px'
+                                }}
+                                alt={`page ${absoluteIdx + 1}`}
+                              />
 
-                            {/* Hover Actions */}
-                            <Box
-                              className="page-actions"
-                              sx={{
-                                position: "absolute",
-                                inset: 0,
-                                bgcolor: "rgba(26, 35, 126, 0.4)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: 1,
-                                opacity: 0,
-                                transition: "opacity 0.2s",
-                                backdropFilter: "blur(2px)",
-                              }}
-                            >
-                              <Tooltip title="Delete Page">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => removePage(page.id)}
-                                  sx={{
-                                    bgcolor: "white",
-                                    color: "error.main",
-                                    "&:hover": {
-                                      bgcolor: "error.main",
-                                      color: "white",
-                                    },
-                                  }}
-                                >
-                                  <Trash2 size={16} />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Move Up">
-                                <IconButton
-                                  size="small"
-                                  disabled={idx === 0}
-                                  onClick={() => movePage(idx, "up")}
-                                  sx={{
-                                    bgcolor: "white",
-                                    color: "primary.main",
-                                    "&:hover": {
-                                      bgcolor: "primary.main",
-                                      color: "white",
-                                    },
-                                  }}
-                                >
-                                  <ArrowUp size={16} />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Move Down">
-                                <IconButton
-                                  size="small"
-                                  disabled={idx === pages.length - 1}
-                                  onClick={() => movePage(idx, "down")}
-                                  sx={{
-                                    bgcolor: "white",
-                                    color: "primary.main",
-                                    "&:hover": {
-                                      bgcolor: "primary.main",
-                                      color: "white",
-                                    },
-                                  }}
-                                >
-                                  <ArrowDown size={16} />
-                                </IconButton>
-                              </Tooltip>
+                              {/* Page Label */}
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  top: 8,
+                                  left: 8,
+                                  bgcolor: "secondary.main",
+                                  color: "white",
+                                  px: 1,
+                                  minWidth: 20,
+                                  height: 20,
+                                  borderRadius: '6px',
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: '11px',
+                                  fontWeight: 900,
+                                  boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                                  zIndex: 3
+                                }}
+                              >
+                                {absoluteIdx + 1}
+                              </Box>
+
+                              {/* Drag Handle & Selection Overlay */}
+                              <Box 
+                                sx={{ 
+                                  position: 'absolute', 
+                                  inset: 0, 
+                                  cursor: 'grab', 
+                                  '&:active': { cursor: 'grabbing' },
+                                  zIndex: 1
+                                }}
+                                draggable
+                                onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
+                                  e.dataTransfer.setData('text/plain', absoluteIdx.toString());
+                                  if (e.currentTarget.parentElement) {
+                                    e.currentTarget.parentElement.style.opacity = '0.4';
+                                  }
+                                }}
+                                onDragEnd={(e: React.DragEvent<HTMLDivElement>) => {
+                                  if (e.currentTarget.parentElement) {
+                                    e.currentTarget.parentElement.style.opacity = '1';
+                                  }
+                                }}
+                                onDragOver={(e: React.DragEvent<HTMLDivElement>) => e.preventDefault()}
+                                onDrop={(e: React.DragEvent<HTMLDivElement>) => {
+                                  e.preventDefault();
+                                  const fromIdxStr = e.dataTransfer.getData('text/plain');
+                                  const fromIdx = parseInt(fromIdxStr);
+                                  if (!isNaN(fromIdx) && fromIdx !== absoluteIdx) {
+                                    handleDragEnd(pages[fromIdx], idx);
+                                  }
+                                }}
+                              >
+                                <Box sx={{ position: 'absolute', top: 8, right: 8, color: 'text.disabled', zIndex: 3 }}>
+                                  <GripVertical size={16} />
+                                </Box>
+                              </Box>
+
+                              {/* Hover Actions */}
+                              <Box
+                                className="page-actions"
+                                sx={{
+                                  position: "absolute",
+                                  bottom: 8,
+                                  left: "50%",
+                                  transform: "translateX(-50%)",
+                                  bgcolor: "background.paper",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  gap: 0.5,
+                                  p: 0.5,
+                                  borderRadius: '8px',
+                                  opacity: 0,
+                                  transition: "all 0.2s ease",
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                  zIndex: 5
+                                }}
+                              >
+                                <Tooltip title="Remove Page">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => removePage(page.id)}
+                                    sx={{ 
+                                      color: "error.main",
+                                      p: 0.5
+                                    }}
+                                  >
+                                    <Trash2 size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
                             </Box>
-                          </Box>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
+                          </Card>
+                        </motion.div>
+                      );
+                    })}
+                  </Box>
+
+                  {pages.length > itemsPerPage && (
+                    <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+                      <Pagination 
+                        count={Math.ceil(pages.length / itemsPerPage)} 
+                        page={currentPage} 
+                        onChange={(_, v) => setCurrentPage(v)}
+                        color="secondary"
+                        sx={{
+                          "& .MuiPaginationItem-root": { fontWeight: 900, borderRadius: 2 }
+                        }}
+                      />
+                    </Box>
+                  )}
                 </motion.div>
               ) : (
                 <motion.div
