@@ -6,7 +6,7 @@ import {
   Box, Card, CardContent, Typography, Button,
   Grid, Stack, IconButton, Alert, CircularProgress, LinearProgress
 } from '@mui/material';
-import { FileText, Download, RefreshCw, X, Image as ImageIcon } from 'lucide-react';
+import { FileText, Download, RefreshCw } from 'lucide-react';
 import { formatFileSize } from '@/lib/image-utils';
 import { pdfToImages } from '@/lib/pdf-utils';
 
@@ -58,14 +58,14 @@ export function PDFToImage() {
     setResults([]);
 
     try {
-      const images = await pdfToImages(file, (p) => setProgress(p));
+      const images = await pdfToImages(file, { onProgress: (p) => setProgress(p) });
       const resultsWithUrls = images.map((img) => ({
         ...img,
         url: URL.createObjectURL(img.blob)
       }));
       setResults(resultsWithUrls);
-    } catch (err: any) {
-      setError(err.message || 'Conversion failed. Please try again.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Conversion failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -129,7 +129,9 @@ export function PDFToImage() {
             ref={fileInputRef}
             onChange={handleFileChange}
           />
-          <FileText size={48} color="rgba(128,128,128,0.4)" />
+          <Box sx={{ color: 'text.disabled', opacity: 0.5, mb: 1, display: 'inline-flex' }}>
+            <FileText size={48} />
+          </Box>
           <Typography variant="h6" sx={{ mt: 2 }}>
             {isDragging ? 'Drop PDF here' : 'Click or drag & drop a PDF file'}
           </Typography>
@@ -190,7 +192,7 @@ export function PDFToImage() {
                     component="img"
                     src={res.url}
                     alt={res.name}
-                    sx={{ width: '100%', height: 200, objectFit: 'contain', bgcolor: '#f5f5f5' }}
+                    sx={{ width: '100%', height: 200, objectFit: 'contain', bgcolor: 'action.hover' }}
                   />
                   <CardContent sx={{ p: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Typography variant="caption" fontWeight={600} noWrap sx={{ maxWidth: '70%' }}>

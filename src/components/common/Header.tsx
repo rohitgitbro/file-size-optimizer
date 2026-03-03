@@ -1,38 +1,106 @@
+
 'use client';
 
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, IconButton, useTheme, Box, Container } from '@mui/material';
-import { Brightness4, Brightness7, Camera } from '@mui/icons-material';
-import { FileText } from 'lucide-react';
+import { AppBar, Toolbar, Typography, Button, IconButton, useTheme, Box, Container, Stack } from '@mui/material';
 import { useColorMode } from '@/context/ThemeContext';
 import Link from 'next/link';
+import { Moon, Sun, Command, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export function Header() {
   const theme = useTheme();
   const { toggleColorMode, mode } = useColorMode();
 
   return (
-    <AppBar position="sticky" elevation={0} sx={{ borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: 'background.paper', color: 'text.primary' }}>
+    <AppBar 
+      position="sticky" 
+      elevation={0} 
+      sx={{ 
+        borderBottom: `1px solid ${theme.palette.divider}`, 
+        bgcolor: 'background.paper', 
+        color: 'text.primary',
+        backdropFilter: 'blur(8px)',
+        background: theme.palette.background.glass
+      }}
+    >
       <Container maxWidth="lg">
-        <Toolbar disableGutters>
-          <Box display="flex" alignItems="center" component={Link} href="/" sx={{ textDecoration: 'none', color: 'inherit', flexGrow: 1 }}>
-            <Camera sx={{ mr: 1, color: 'primary.main', fontSize: 28 }} />
-            <Typography variant="h6" component="div" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
-              GovForm<Box component="span" sx={{ color: 'primary.main' }}>Tools</Box>
+        <Toolbar disableGutters sx={{ height: 64 }}>
+          {/* Logo */}
+          <Box 
+            display="flex" 
+            alignItems="center" 
+            component={Link} 
+            href="/" 
+            sx={{ 
+              textDecoration: 'none', 
+              color: 'inherit', 
+              flexGrow: 1,
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'scale(1.02)' }
+            }}
+          >
+            <Box 
+              sx={{ 
+                mr: 1.5, 
+                width: 32, 
+                height: 32, 
+                bgcolor: 'primary.main', 
+                borderRadius: '8px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                color: 'white',
+                boxShadow: '0 4px 12px rgba(26, 35, 126, 0.2)'
+              }}
+            >
+              <Command size={20} strokeWidth={2.5} />
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 900, letterSpacing: -1, fontSize: '1.25rem' }}>
+              Opti<Box component="span" sx={{ color: 'primary.main' }}>File</Box>
             </Typography>
           </Box>
           
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
-            <Button component={Link} href="/image-optimizer" color="inherit">Images</Button>
-            <Button component={Link} href="/pdf-converter" color="inherit">Images to PDF</Button>
-            <Button component={Link} href="/pdf-merger" color="inherit">PDF Merger</Button>
-            <Button component={Link} href="/pdf-to-image" color="inherit">PDF Editor</Button>
-            <Button component={Link} href="/" color="inherit">Tools</Button>
-          </Box>
+          {/* Desktop Nav */}
+          <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' }, mr: 3 }}>
+            <Button component={Link} href="/" color="inherit" sx={{ fontWeight: 700, opacity: 0.7, '&:hover': { opacity: 1 } }}>Dashboard</Button>
+            <Button 
+              color="primary" 
+              variant="outlined" 
+              startIcon={<ShieldCheck size={16} />} 
+              sx={{ 
+                fontWeight: 800, 
+                px: 2,
+                borderRadius: '10px',
+                borderWidth: '2px',
+                '&:hover': { borderWidth: '2px' },
+                color: 'primary.main',
+                borderColor: 'primary.main'
+              }}
+            >
+              Privacy First
+            </Button>
+          </Stack>
 
-          <IconButton onClick={toggleColorMode} color="inherit">
-            {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-          </IconButton>
+          {/* Actions */}
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Box sx={{ width: '1px', height: 20, bgcolor: 'divider', mx: 1, display: { xs: 'none', sm: 'block' } }} />
+
+            <motion.div whileTap={{ scale: 0.9 }}>
+              <IconButton 
+                onClick={toggleColorMode} 
+                sx={{ 
+                  bgcolor: 'action.hover',
+                  color: 'themeToggle',
+                  borderRadius: '12px',
+                  width: 40,
+                  height: 40
+                }}
+              >
+                {mode === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              </IconButton>
+            </motion.div>
+          </Stack>
         </Toolbar>
       </Container>
     </AppBar>

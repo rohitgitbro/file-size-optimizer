@@ -1,189 +1,307 @@
-import { Container, Box, Typography, Grid, Card, CardContent, Button, Stack, Chip, Divider } from '@mui/material';
-import { Image as ImageIcon, FileText, Zap, ShieldCheck, Lock, ArrowRight, Download } from 'lucide-react';
+
+'use client';
+
+import React from 'react';
+import { 
+  Container, Box, Typography, Grid, Card, CardContent, 
+  Button, Stack, Chip, useTheme, CircularProgress, IconButton
+} from '@mui/material';
+import { Palette } from '@mui/material/styles';
+import { 
+  Image as ImageIcon, FileText, Zap, ShieldCheck, Lock, Search
+} from 'lucide-react';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { ImageOptimizer } from '@/components/features/ImageOptimizer';
 import { PDFOptimizer } from '@/components/features/PDFOptimizer';
 import { PDFMerger } from '@/components/features/PDFMerger';
 import { PDFHybridTool } from '@/components/features/PDFHybridTool';
-import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+
+type ToolId = 'image' | 'pdf-convert' | 'pdf-merge' | 'pdf-surgical' | null;
+
+function DashboardContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeTool = searchParams.get('tool') as ToolId;
+  const theme = useTheme();
+
+  const setActiveTool = (tool: ToolId) => {
+    if (tool) {
+      router.push(`/?tool=${tool}`, { scroll: false });
+    } else {
+      router.push('/', { scroll: false });
+    }
+  };
+
+  const getTools = (palette: Palette) => [
+    {
+      id: 'image' as ToolId,
+      title: 'Image Optimizer',
+      desc: 'Compress & Resize to exact KB',
+      icon: <ImageIcon size={28} />,
+      color: palette.tools.image,
+      chip: 'Most Popular'
+    },
+    {
+      id: 'pdf-convert' as ToolId,
+      title: 'Images to PDF',
+      desc: 'Professional document creation',
+      icon: <FileText size={28} />,
+      color: palette.tools.pdf,
+    },
+    {
+      id: 'pdf-merge' as ToolId,
+      title: 'PDF Merger',
+      desc: 'Combine multiple documents',
+      icon: <Search size={28} />,
+      color: palette.tools.merge,
+    },
+    {
+      id: 'pdf-surgical' as ToolId,
+      title: 'Surgical Editor',
+      desc: 'Modify PDF contents directly',
+      icon: <Zap size={28} />,
+      color: palette.tools.surgical,
+    }
+  ];
+
+  const tools = getTools(theme.palette);
+
+  return (
+    <Box component="main" sx={{ flexGrow: 1 }}>
+      <AnimatePresence mode="wait">
+        {!activeTool ? (
+          <motion.div
+            key="landing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Hero Section */}
+            <Box 
+              style={{ 
+                paddingTop: '80px',
+                paddingBottom: '80px',
+                background: theme.gradients.hero,
+              }}
+            >
+              <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
+                <Box>
+                  <Chip 
+                    label="100% Client-Side Processing" 
+                    color="primary" 
+                    variant="outlined"
+                    icon={<Lock size={14} />}
+                    style={{
+                      marginBottom: '24px',
+                      fontWeight: 800,
+                      paddingLeft: '12px',
+                      paddingRight: '12px'
+                    }}
+                  />
+                  <Typography 
+                    variant="h1" 
+                    gutterBottom 
+                    sx={{ 
+                      fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', 
+                      lineHeight: 1.1, 
+                      fontWeight: 900,
+                      background: theme.gradients.text,
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      color: 'transparent', // Fallback for some browsers
+                      mb: 2
+                    }}
+                  >
+                    The Private Way to <br /> Handle Your Files
+                  </Typography>
+                  <Typography 
+                    variant="body1" 
+                    color="text.secondary" 
+                    style={{ 
+                      marginBottom: '48px', 
+                      fontSize: '1.4rem', 
+                      maxWidth: '800px', 
+                      marginLeft: 'auto', 
+                      marginRight: 'auto', 
+                      opacity: 0.9 
+                    }}
+                  >
+                    No uploads. No server storage. Your files never leave your computer.
+                    Full power file optimization, right in your browser.
+                  </Typography>
+                </Box>
+
+                <Grid container spacing={3} justifyContent="center">
+                  {tools.map((tool, idx) => (
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }} key={tool.id} sx={{ display: 'flex' }}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: idx * 0.1 }}
+                        style={{ display: 'flex', width: '100%' }}
+                      >
+                        <Card 
+                          onClick={() => setActiveTool(tool.id)}
+                          sx={{ 
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            border: `1px solid ${theme.palette.divider}`,
+                            '&:hover': {
+                              transform: 'translateY(-8px)',
+                              borderColor: tool.color,
+                              boxShadow: `0 20px 40px -10px ${tool.color}25`,
+                              '& .tool-icon': {
+                                bgcolor: tool.color,
+                                color: '#fff',
+                                transform: 'scale(1.1) rotate(5deg)'
+                              }
+                            }
+                          }}
+                        >
+                          <CardContent sx={{ p: 4, textAlign: 'left', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                            {tool.chip && (
+                              <Chip label={tool.chip} size="small" color="secondary" sx={{ position: 'absolute', top: 16, right: 16, height: 20, fontSize: '0.65rem', fontWeight: 900, color: 'rgba(0,0,0,0.85)' }} />
+                            )}
+                            <Box 
+                              className="tool-icon"
+                              sx={{ 
+                                display: 'inline-flex', 
+                                p: 1.5, 
+                                bgcolor: 'action.hover', 
+                                borderRadius: 3, 
+                                color: tool.color,
+                                mb: 3,
+                                transition: 'all 0.3s ease',
+                                width: 'fit-content'
+                              }}
+                            >
+                              {tool.icon}
+                            </Box>
+                            <Typography variant="h6" fontWeight={900} gutterBottom sx={{ color: 'text.primary' }}>{tool.title}</Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }}>{tool.desc}</Typography>
+                            
+                            <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', color: tool.color, fontWeight: 800, fontSize: '0.85rem' }}>
+                              Launch Tool <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Container>
+            </Box>
+
+            {/* Trust Section */}
+            <Box 
+              style={{ 
+                paddingTop: '80px', 
+                paddingBottom: '80px',
+                backgroundColor: theme.palette.background.subtle
+              }}
+            >
+              <Container maxWidth="lg">
+                <Grid container spacing={8} alignItems="center">
+                  {[
+                    { icon: <ShieldCheck size={32} />, title: "Bank-Level Privacy", desc: "No files are ever uploaded. Logic runs in your RAM using WebWorkers." },
+                    { icon: <Zap size={32} />, title: "Instant Processing", desc: "Zero network latency. Files process as fast as your CPU allows." },
+                    { icon: <Lock size={32} />, title: "100% Free", desc: "No subscriptions, no watermarks. Professional tools for everyone." }
+                  ].map((item, idx) => (
+                    <Grid size={{ xs: 12, md: 4 }} key={idx}>
+                      <Stack direction="row" spacing={3}>
+                        <Box sx={{ color: 'primary.main' }}>{item.icon}</Box>
+                        <Box>
+                          <Typography variant="h6" fontWeight={800} color="text.primary">{item.title}</Typography>
+                          <Typography variant="body2" color="text.secondary">{item.desc}</Typography>
+                        </Box>
+                      </Stack>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Container>
+            </Box>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="tool-view"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.4 }}
+          >
+            <Box sx={{ position: 'sticky', top: 64, zIndex: 10, bgcolor: 'background.default', borderBottom: '1px solid', borderColor: 'divider', py: 1.5 }}>
+              <Container maxWidth="lg">
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Button 
+                    variant="text" 
+                    startIcon={<ArrowLeft size={18} />} 
+                    onClick={() => setActiveTool(null)}
+                    sx={{ fontWeight: 800, color: 'text.secondary' }}
+                  >
+                    Back to Dashboard
+                  </Button>
+                  <Stack direction="row" spacing={1}>
+                    {tools.map(t => (
+                      <IconButton 
+                        key={t.id}
+                        size="small"
+                        onClick={() => setActiveTool(t.id)}
+                        sx={{ 
+                          color: activeTool === t.id ? t.color : 'text.disabled',
+                          bgcolor: activeTool === t.id ? `${t.color}15` : 'transparent',
+                          '&:hover': { bgcolor: `${t.color}25` }
+                        }}
+                      >
+                        {t.icon}
+                      </IconButton>
+                    ))}
+                  </Stack>
+                </Box>
+              </Container>
+            </Box>
+
+            {activeTool === 'image' && <ImageOptimizer />}
+            {activeTool === 'pdf-convert' && <PDFOptimizer />}
+            {activeTool === 'pdf-merge' && <PDFMerger />}
+            {activeTool === 'pdf-surgical' && <PDFHybridTool />}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Box>
+  );
+}
 
 export default function Home() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
       <Header />
-      
-      <Box component="main" sx={{ flexGrow: 1 }}>
-        {/* Hero Section */}
-        <Box sx={{ bgcolor: 'background.paper', pt: 10, pb: 8, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Container maxWidth="lg">
-            <Grid container spacing={4} alignItems="center">
-              <Grid size={{ xs: 12, md: 7 }}>
-                <Chip 
-                  label="100% Privacy - All processing happens in your browser" 
-                  color="secondary" 
-                  size="small" 
-                  sx={{ mb: 2, fontWeight: 700 }} 
-                />
-                <Typography variant="h1" gutterBottom sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' }, lineHeight: 1.1 }}>
-                  Precise File Tools for <Box component="span" sx={{ color: 'primary.main' }}>Modern Work</Box>
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 4, fontSize: '1.2rem', maxWidth: 600 }}>
-                  Optimize images, merge PDFs, and convert formats with ease. No upload to server, completely private and secure.
-                </Typography>
-                <Stack direction="row" spacing={2}>
-                  <Button variant="contained" size="large" endIcon={<ArrowRight />} href="#tools">
-                    See Tools
-                  </Button>
-                  <Button variant="outlined" size="large">
-                    Privacy First
-                  </Button>
-                </Stack>
-              </Grid>
-              <Grid size={{ xs: 12, md: 5 }} sx={{ display: { xs: 'none', md: 'block' } }}>
-                <Box sx={{ p: 4, bgcolor: 'primary.main', borderRadius: 4, color: 'white', position: 'relative', overflow: 'hidden' }}>
-                  <Typography variant="h6" gutterBottom fontWeight={700}>Security & Speed</Typography>
-                  <Stack spacing={2} sx={{ mt: 3 }}>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      <Zap size={24} />
-                      <Typography variant="body2">Instant browser processing (&lt;1s)</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      <ShieldCheck size={24} />
-                      <Typography variant="body2">Zero file uploads to any server</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      <Lock size={24} />
-                      <Typography variant="body2">Client-side only architecture</Typography>
-                    </Box>
-                  </Stack>
-                  <Box sx={{ position: 'absolute', right: -20, bottom: -20, opacity: 0.1 }}>
-                    <FileText size={150} />
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
-          </Container>
-        </Box>
-
-        {/* Tools Section */}
-        <Box id="tools" sx={{ py: 10 }}>
-          <Container maxWidth="lg">
-            <Box sx={{ mb: 8 }}>
-              <Typography variant="h3" align="center" fontWeight={800} gutterBottom>
-                Powerful Browser Tools
-              </Typography>
-              <Typography variant="body1" align="center" color="text.secondary">
-                Secure, fast, and 100% private file manipulation
-              </Typography>
-            </Box>
-
-            <Grid container spacing={4} sx={{ mb: 10 }}>
-              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-                <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1, bgcolor: 'primary.light', borderRadius: 2, color: 'white' }}>
-                      <ImageIcon size={24} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} gutterBottom>Image Optimizer</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Compress and resize images to exact KB limits.
-                    </Typography>
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                      <Chip label="Resize" size="small" variant="outlined" />
-                      <Chip label="KB Limit" size="small" variant="outlined" />
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-                <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1, bgcolor: 'secondary.main', borderRadius: 2, color: 'white' }}>
-                      <FileText size={24} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} gutterBottom>Images to PDF</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                       Convert multiple JPG/PNG into a single PDF.
-                    </Typography>
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                       <Chip label="Convert" size="small" variant="outlined" />
-                       <Chip label="Combine" size="small" variant="outlined" />
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-                <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1, bgcolor: '#4caf50', borderRadius: 2, color: 'white' }}>
-                      <FileText size={24} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} gutterBottom>PDF Merger</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                       Combine multiple PDFs with custom ordering.
-                    </Typography>
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                       <Chip label="Merge" size="small" variant="outlined" />
-                       <Chip label="Reorder" size="small" variant="outlined" />
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-                <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' }, cursor: 'pointer' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ mb: 2, display: 'inline-flex', p: 1, bgcolor: '#ff9800', borderRadius: 2, color: 'white' }}>
-                      <Download size={24} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} gutterBottom>PDF Surgical Editor</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                       Deconstruct PDF into images, optimize, and rebuild.
-                    </Typography>
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                       <Chip label="Hybrid" size="small" color="primary" />
-                       <Chip label="Rebuild PDF" size="small" variant="outlined" />
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-            </Grid>
-
-            {/* Interactive Tools */}
-            <Box sx={{ py: 4 }}>
-              <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
-                Image Optimization
-              </Typography>
-              <ImageOptimizer />
-              
-              <Divider sx={{ my: 10 }} />
-              
-              <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
-                Images to PDF
-              </Typography>
-              <PDFOptimizer />
-
-              <Divider sx={{ my: 10 }} />
-              
-              <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
-                PDF Merger
-              </Typography>
-              <PDFMerger />
-
-              <Divider sx={{ my: 10 }} />
-              
-              <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 6 }}>
-                PDF Surgical Editor
-              </Typography>
-              <PDFHybridTool />
-            </Box>
-
-          </Container>
-        </Box>
-      </Box>
-
+      <Suspense fallback={<CircularProgress sx={{ display: 'block', mx: 'auto', mt: 10 }} />}>
+        <DashboardContent />
+      </Suspense>
       <Footer />
     </Box>
   );
 }
+
+const ChevronRight = ({ size, style }: { size: number, style?: React.CSSProperties }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <path d="m9 18 6-6-6-6"/>
+  </svg>
+);
+
+const ArrowLeft = ({ size }: { size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+  </svg>
+);

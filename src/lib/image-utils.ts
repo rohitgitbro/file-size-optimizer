@@ -35,7 +35,7 @@ export const compressImage = async (
   };
 
   try {
-    let currentFile = await imageCompression(file, initialOptions);
+    await imageCompression(file, initialOptions);
     
     // Binary search for the best quality factor
     while (iterations < MAX_ITERATIONS) {

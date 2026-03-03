@@ -23,8 +23,8 @@ export default function NotFound() {
               Page Not Found
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              The page you are looking for might have been moved or doesn't exist.
-              Let's get you back to the home page or choose a tool above.
+              The page you are looking for might have been moved or doesn&apos;t exist.
+              Let&apos;s get you back to the home page or choose a tool above.
             </Typography>
             <Button 
               variant="contained" 

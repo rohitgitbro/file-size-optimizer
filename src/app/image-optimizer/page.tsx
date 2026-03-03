@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { Container, Box, Typography, Button, Breadcrumbs, Link as MuiLink } from '@mui/material';
+import { Container, Box, Typography, Breadcrumbs, Link as MuiLink } from '@mui/material';
 import { ImageOptimizer } from '@/components/features/ImageOptimizer';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';

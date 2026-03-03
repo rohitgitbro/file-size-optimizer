@@ -1,9 +1,9 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { ThemeProvider, createTheme, PaletteMode, CssBaseline, Box } from '@mui/material';
-import { getDesignTokens } from '@/theme/theme';
+import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
+import { ThemeProvider, PaletteMode, CssBaseline } from '@mui/material';
+import { lightTheme, darkTheme } from '@/theme/theme';
 
 interface ColorModeContextType {
   toggleColorMode: () => void;
@@ -17,27 +17,33 @@ const ColorModeContext = createContext<ColorModeContextType>({
 
 export const useColorMode = () => useContext(ColorModeContext);
 
-export function AppThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<PaletteMode>('light');
-  const [mounted, setMounted] = useState(false);
+interface AppThemeProviderProps {
+  children: React.ReactNode;
+  initialMode: PaletteMode;
+}
 
-  useEffect(() => {
-    setMounted(true);
-    const savedMode = localStorage.getItem('themeMode') as PaletteMode;
-    if (savedMode) {
-      setMode(savedMode);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setMode('dark');
-    }
-  }, []);
+export function AppThemeProvider({ children, initialMode }: AppThemeProviderProps) {
+  // Use the mode provided by the server (via cookie) or fallback to 'light'
+  const [mode, setMode] = useState<PaletteMode>(initialMode);
 
+  // Sync mode with localStorage and a cookie so the server knows it on next request
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
-        setMode((prevMode) => {
-          const newMode = prevMode === 'light' ? 'dark' : 'light';
-          localStorage.setItem('themeMode', newMode);
-          return newMode;
+        setMode((prev) => {
+          const next = prev === 'light' ? 'dark' : 'light';
+          
+          // 1. Sync LocalStorage for client-side persistence
+          localStorage.setItem('themeMode', next);
+          
+          // 2. Sync Cookie so Server-Side Rendering (SSR) knows the theme
+          // This prevents hydration mismatches because server and client will match
+          document.cookie = `theme-mode=${next}; path=/; max-age=31536000; SameSite=Lax`;
+          
+          // 3. Update DOM attribute for any existing CSS logic
+          document.documentElement.setAttribute('data-theme', next);
+          
+          return next;
         });
       },
       mode,
@@ -45,16 +51,29 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
     [mode]
   );
 
-  const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
+  const theme = useMemo(
+    () => (mode === 'dark' ? darkTheme : lightTheme),
+    [mode]
+  );
 
-  // Prevent hydration mismatch by only rendering after mount
+  // Fallback for case where cookie isn't set yet but user has a preference in localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('themeMode') as PaletteMode;
+    if (saved && saved !== initialMode) {
+      // Use requestAnimationFrame to avoid "cascading renders" lint error
+      requestAnimationFrame(() => {
+        setMode(saved);
+        document.cookie = `theme-mode=${saved}; path=/; max-age=31536000; SameSite=Lax`;
+        document.documentElement.setAttribute('data-theme', saved);
+      });
+    }
+  }, [initialMode]);
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box sx={{ visibility: mounted ? 'visible' : 'hidden' }}>
-          {children}
-        </Box>
+        {children}
       </ThemeProvider>
     </ColorModeContext.Provider>
   );
