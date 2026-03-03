@@ -7,6 +7,7 @@ export interface CompressionOptions {
   width?: number;
   height?: number;
   useWebWorker?: boolean;
+  fileType?: string;
 }
 
 export const compressImage = async (
